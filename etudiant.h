@@ -22,7 +22,7 @@ typedef struct{
 Date* creerDate();
 int dateValide(Date*d);
 // operations de CRUD des etudiants
-Etudiant* creerEtudiant();
+Etudiant* creerEtudiant(const char*nomFichier);
 int modifierEtudiant(const char*matricule,const char*nomFichier);
 int supprimerEtudiant(const char*matricule,const char*nomFichier);
 void afficherEtudint(Etudiant*e);
