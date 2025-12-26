@@ -3,33 +3,50 @@
 // structure de la date
 typedef struct{
     int jour;
-    int moi;
+    int mois;
     int annee;
 }Date;
-// structure de l'etudiant
+
+// structure de donnees pour representer un etudiant
 typedef struct{
    char matricule[20];
    char nom[20];
    char prenom[20];
-   Date datenaissance;
-   char departement[15];
+   Date dateNaissance;
+   char departement[20];
    char filiere[30];
-   char region[10];
+   char region[20];
    char sexe;
-   char filiere[15];
+   
 }Etudiant;
+
 // gestion de la date
-Date* creerDate();
-int dateValide(Date*d);
+
+//fonction pour creer une date
+void  saisirDate(Date *d);
+// int dateValide(Date*d);
+
+Date dateActuelle();
+//declation d'une fonction pour les messages d'alerte
+void alert(char* message);
+//declaration de la fonction pour formater les entetes
+void entete(char* message);
 // operations de CRUD des etudiants
-Etudiant* creerEtudiant(const char*nomFichier);
+void saisirEtudiant();
+//Etudiant* creerEtudiant(const char*nomFichier);
 int modifierEtudiant(const char*matricule,const char*nomFichier);
 int supprimerEtudiant(const char*matricule,const char*nomFichier);
 void afficherEtudint(Etudiant*e);
 // operations supplementaires
 int calculAge(const char*matricule);
+
+
 int nombreEtudiant(const char*nomFichier);
-int verifierMatriclule(const char*matricule);
+
+//int verifierMatriclule(const char*matricule);
+// declaration d'une fonction pour generer automatiquement les matricules a partir d'un fichier index.txt
+char *generate_matricule(char *structure, int index);
+
 void afficherTousLesEtudiant(const char*nomFichier);
 //pour les differentes recherches
 int rechercherEtudiantParMatricule(const char*matricule,const char*nomFichier);
