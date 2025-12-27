@@ -23,7 +23,7 @@ typedef struct{
 // gestion de la date
 
 //fonction pour creer une date
-void  saisirDate(Date *d);
+void  saisirDate(Date d);
 // int dateValide(Date*d);
 
 Date dateActuelle();
@@ -47,7 +47,7 @@ int nombreEtudiant(const char*nomFichier);
 // declaration d'une fonction pour generer automatiquement les matricules a partir d'un fichier index.txt
 char *generate_matricule(char *structure, int index);
 
-void afficherTousLesEtudiant(const char*nomFichier);
+void afficherTousLesEtudiant();
 //pour les differentes recherches
 int rechercherEtudiantParMatricule(const char*matricule,const char*nomFichier);
 int rechercherEtudiantPardichotomique(const char*matricule,const char*nomFichier);
