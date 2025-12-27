@@ -18,16 +18,19 @@ typedef struct{
    char region[10];
    char sexe;
 }Etudiant;
+
 // gestion de la date
 int dateValide(Date*d);
 int anneeCourante();
 Date creerDate();
 int verifierDate(Date d);
+
 // operations de CRUD des etudiants
 Etudiant creerEtudiant(const char*nomFichier);
 int modifierEtudiant(const char*matricule,const char*nomFichier);
 int supprimerEtudiant(const char*matricule,const char*nomFichier);
 void afficherEtudint(Etudiant e);
+
 // operations supplementaires
 int calculAge(const char*matricule,const char*nomFichier);
 int nombreEtudiant(const char*nomFichier);
@@ -35,10 +38,12 @@ int verifierMatricule(const char*matricule);
 void afficherTousLesEtudiant(const char*nomFichier);
 void genererMatricule( char matricule[], int annee, int numero);
 int prochainNumero();
+
 //pour les differentes recherches
 int rechercherEtudiantParMatricule(const char*matricule,const char*nomFichier);
 int rechercherEtudiantPardichotomique(const char*matricule,const char*nomFichier);
 int rechercherEtudiantParNom(const char*matricule,const char*nomFichier);
+
 // pour les differents tri
 void trierParNom(const char*nomFichier);
 void trierParMatricule(const char*nomFichier);
