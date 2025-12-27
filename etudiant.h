@@ -23,8 +23,8 @@ typedef struct{
 // gestion de la date
 
 //fonction pour creer une date
-void  saisirDate(Date d);
-// int dateValide(Date*d);
+Date creerDate();
+int dateValide(Date d);
 
 Date dateActuelle();
 //declation d'une fonction pour les messages d'alerte
@@ -32,11 +32,11 @@ void alert(char* message);
 //declaration de la fonction pour formater les entetes
 void entete(char* message);
 // operations de CRUD des etudiants
-void saisirEtudiant();
-//Etudiant* creerEtudiant(const char*nomFichier);
+//void saisirEtudiant();
+void creerEtudiant(Etudiant student);
 int modifierEtudiant(const char*matricule,const char*nomFichier);
 int supprimerEtudiant(const char*matricule,const char*nomFichier);
-void afficherEtudiant(Etudiant*e);
+void afficherEtudiant(Etudiant e);
 // operations supplementaires
 int calculAge(const char*matricule);
 

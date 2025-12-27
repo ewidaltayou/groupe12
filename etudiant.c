@@ -4,8 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-void saisirDate(Date d)
+Date creerDate()
 {
+    Date d;
     do
     {
         printf("veuillez entrer convenablement la date dans le cas contraire vous serrez contraint de recommencer \n");
@@ -30,6 +31,7 @@ void saisirDate(Date d)
         
         printf("\n");
     } while ((d.jour>31 || d.mois > 12) || (d.mois == 2 && d.jour > 29));
+    return d;
 }
 
 Date dateActuelle()
@@ -58,7 +60,11 @@ void alert(char* message)
     printf("-------\n");
 }
 //definition de la fonction pour formater les entetes
+int dateValide(Date d)
+{
+    return 1;
 
+}
 void entete(char* message)
 {
     int i;
@@ -98,7 +104,7 @@ void enregistrerEtudiant(Etudiant student)
     fclose(f);
 }
 //creation d'un nouvel etudiant
-void saisirEtudiant(Etudiant student) {
+void creerEtudiant(Etudiant student) {
     entete("Enregistrement d'un etudiant");
     FILE *indexFile = fopen("index.txt", "r");
     int i = 0;
@@ -115,9 +121,13 @@ void saisirEtudiant(Etudiant student) {
 
     printf("Prenom : ");
     scanf("%19s", student.prenom);
-
+    do
+    {
+        
     printf("Date de naissance :\n");
-    saisirDate(student.dateNaissance);
+    student.dateNaissance = creerDate();
+    } while (!dateValide(student.dateNaissance));
+    
 
     printf("Departement : ");
     scanf("%19s", student.departement);
@@ -185,4 +195,28 @@ void afficherTousLesEtudiant() {
 
    // printf("--------------------------------------------------------------------------------------------------------\n");
     fclose(f);
+}
+
+void afficherEtudint(Etudiant e)
+{
+    FILE *f = fopen("student.txt","r");
+    if (f == NULL)
+    {
+        printf("Erreur d'ouverture du fichier");
+        exit(1);    
+    }
+    
+    fscanf(f,
+        "%19s\t%19s\t%19s\t%d/%d/%d\t%19s\t%19s\t%19s\t%c",
+        e.matricule,
+        e.nom,
+        e.prenom,
+        &e.dateNaissance.jour,
+        &e.dateNaissance.mois,
+        &e.dateNaissance.annee,
+        e.departement,
+        e.filiere,
+        e.region,
+        &e.sexe);
+    printf("Matricule: %19s\nNom: %19s\nprenom: %19s\nDate de Naissance: %02d/%02d/%04d\nDepartement: %19s\nFiliere: %19s\nRegion:%19s\nSexe: %c",e.matricule,e.nom,e.prenom,e.dateNaissance.jour,e.dateNaissance.mois,e.dateNaissance.annee,e.departement,e.filiere,e.region,e.sexe);
 }
