@@ -10,16 +10,15 @@ typedef struct{
 // structure de l'etudiant
 typedef struct{
    char matricule[20];
-   char nom[20];
-   char prenom[20];
+   char nom[30];
+   char prenom[30] ;
    Date dateNaissance;
-   char departement[15];
+   char departement[30];
    char filiere[30];
-   char region[10];
+   char region[20];
    char sexe;
 }Etudiant;
 // gestion de la date
-int dateValide(Date*d);
 int anneeCourante();
 Date creerDate();
 int verifierDate(Date d);
