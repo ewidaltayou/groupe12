@@ -94,7 +94,7 @@ void enregistrerEtudiant(Etudiant *student)
         printf("Erreur lors de l'ouverture du fichier\n");
         exit(1);
     }
-    fprintf(f,"\n%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",student->matricule,student->nom,student->prenom,student->dateNaissance.jour,student->dateNaissance.mois,student->dateNaissance.annee,student->departement,student->filiere,student->region,student->sexe);
+    fprintf(f,"\n%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c",student->matricule,student->nom,student->prenom,student->dateNaissance.jour,student->dateNaissance.mois,student->dateNaissance.annee,student->departement,student->filiere,student->region,student->sexe);
     fclose(f);
 }
 //creation d'un nouvel etudiant
