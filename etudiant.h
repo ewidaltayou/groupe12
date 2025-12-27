@@ -36,7 +36,7 @@ void saisirEtudiant();
 //Etudiant* creerEtudiant(const char*nomFichier);
 int modifierEtudiant(const char*matricule,const char*nomFichier);
 int supprimerEtudiant(const char*matricule,const char*nomFichier);
-void afficherEtudint(Etudiant*e);
+void afficherEtudiant(Etudiant*e);
 // operations supplementaires
 int calculAge(const char*matricule);
 
