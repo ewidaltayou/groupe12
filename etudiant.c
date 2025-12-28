@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 //fichier de stockage des etudiants
-#define FICHIER_ETUDIANT "etudiant.txt"
 //fonction pour creer une date conforme
 Date creerDate()
 {
@@ -191,24 +190,24 @@ Etudiant creerEtudiant(const char *nomFichier)
 // fonction pour afficher les donnees d'un etudiant
 void afficherEtudiant(Etudiant e)
 {
-    FILE *f = fopen(FICHIER_ETUDIANT,"r");
-    if (f == NULL)
-    {
-        printf("Erreur d'ouverture du fichier");
-        exit(1);    
-    }
-    fscanf(f,
-        "%19s\t%19s\t%19s\t%d/%d/%d\t%14s\t%29s\t%9s\t%c",
-        e.matricule,
-        e.nom,
-        e.prenom,
-        &e.dateNaissance.jour,
-        &e.dateNaissance.mois,
-        &e.dateNaissance.annee,
-        e.departement,
-        e.filiere,
-        e.region,
-        &e.sexe);
+    // FILE *f = fopen(,"r");
+    // if (f == NULL)
+    // {
+    //     printf("Erreur d'ouverture du fichier");
+    //     exit(1);    
+    // }
+    // fscanf(f,
+    //     "%19s\t%19s\t%19s\t%d/%d/%d\t%14s\t%29s\t%9s\t%c",
+    //     e.matricule,
+    //     e.nom,
+    //     e.prenom,
+    //     &e.dateNaissance.jour,
+    //     &e.dateNaissance.mois,
+    //     &e.dateNaissance.annee,
+    //     e.departement,
+    //     e.filiere,
+    //     e.region,
+    //     &e.sexe);
     printf("Matricule: %s\nNom: %s\nprenom: %s\nDate de Naissance: %02d/%02d/%04d\nDepartement: %s\nFiliere: %s\nRegion:%s\nSexe: %c\n",e.matricule,e.nom,e.prenom,e.dateNaissance.jour,e.dateNaissance.mois,e.dateNaissance.annee,e.departement,e.filiere,e.region,e.sexe);
 }
 //fonction pour afficher la liste des etudiants dans la console
