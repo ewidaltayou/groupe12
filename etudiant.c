@@ -3,13 +3,20 @@
 #include "etudiant.h"
 #include <stdlib.h>
 #include <string.h>
-
+//fichier de stockage des etudiants
+#define FICHIER_ETUDIANT "etudiant.txt"
+//fonction pour creer une date conforme
 Date creerDate()
 {
     Date d;
+    int valide;
+
     do
     {
+        valide = 1;
+
         printf("veuillez entrer convenablement la date dans le cas contraire vous serrez contraint de recommencer \n");
+
         printf("\tJour: ");
         scanf("%d", &d.jour);
 
@@ -19,21 +26,80 @@ Date creerDate()
         printf("\tAnnee: ");
         scanf("%d", &d.annee);
 
-        if (d.mois == 2 && d.jour > 29)
+        /* Vérification de l'année */
+        if (d.annee <= 0)
         {
-            printf("Le mois de fevrier n'a jamais eu plus de 29 jours\n");
-    
+            printf("L'annee doit etre strictement positive\n");
+            valide = 0;
         }
-        if (d.mois > 12 && d.jour > 31)
+
+        /* Vérification du mois */
+        if (d.mois < 1 || d.mois > 12)
         {
-          printf("La date entree est non valide\n");
+            printf("Le mois doit etre compris entre 1 et 12\n");
+            valide = 0;
         }
-        
+
+        /* Vérification du jour selon le mois */
+        if (valide)
+        {
+            if (d.jour < 1)
+            {
+                printf("Le jour doit etre superieur ou egal a 1\n");
+                valide = 0;
+            }
+            else
+            {
+                switch (d.mois)
+                {
+                    case 1: case 3: case 5: case 7:
+                    case 8: case 10: case 12:
+                        if (d.jour > 31)
+                        {
+                            printf("Ce mois comporte 31 jours maximum\n");
+                            valide = 0;
+                        }
+                        break;
+
+                    case 4: case 6: case 9: case 11:
+                        if (d.jour > 30)
+                        {
+                            printf("Ce mois comporte 30 jours maximum\n");
+                            valide = 0;
+                        }
+                        break;
+
+                    case 2://cas du mois de fevrier on a les annees bissectile et les annees ordinaires
+                        // Annnee bissectile
+                        if ((d.annee % 400 == 0) ||
+                            (d.annee % 4 == 0 && d.annee % 100 != 0))
+                        {
+                            if (d.jour > 29)
+                            {
+                                printf("Fevrier ne comporte pas plus de 29 jours cette annee\n");
+                                valide = 0;
+                            }
+                        }
+                        else
+                        {
+                            if (d.jour > 28)
+                            {
+                                printf("Fevrier ne comporte pas plus de 28 jours cette annee\n");
+                                valide = 0;
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
         printf("\n");
-    } while ((d.jour>31 || d.mois > 12) || (d.mois == 2 && d.jour > 29));
+
+    } while (!valide);
+
     return d;
 }
-
+//fonction pour retourner la date actuelle
 Date dateActuelle()
 {
     time_t now = time(NULL);
@@ -46,69 +112,39 @@ Date dateActuelle()
 
     return d;    
 }
-
-//definition d'un fonction pour pour les messages d'alertes
-void alert(char* message)
-{
-    int i=0;
-    printf("\n\n\t\t\t\t-------");
-    for(i=0; i<strlen(message); i++) printf("-");
-    printf("-------\n");
-    printf("\t\t\t\t|      %s      |\n", message);
-    printf("\t\t\t\t-------");
-    for(i=0; i<strlen(message); i++) printf("-");
-    printf("-------\n");
-}
-//definition de la fonction pour formater les entetes
-int dateValide(Date d)
-{
-    return 1;
-
-}
-void entete(char* message)
-{
-    int i;
-    printf("\n\n\t----------------------------------");
-    for(i=0; i<strlen(message); i++) printf("-");
-    printf("----------------------------------\n");
-
-    printf("\t|                                 %s                                 |\n", message);
-
-    printf("\t----------------------------------");
-    for(i=0; i<strlen(message); i++) printf("-");
-    printf("----------------------------------\n\n");
-}
-
-char *generate_matricule(char *structure, int index) {
+//definition de la fonction pour gerer automatiquement le matricule
+char *generate_matricule(const char *etablissement, int index) {
     char *code = malloc(30);
     if (!code)
     {
       printf("Erreur d'allocation\n");
       exit(1);
     }
-    
     Date dateActu = dateActuelle();
-    int chrifreAns = dateActu.annee % 100;//deux derniers chiffres qui compose l'annee
-    snprintf(code,30, "%d%s%04d",chrifreAns,structure,index);
+    int chriffresAnnee = dateActu.annee % 100;//deux derniers chiffres qui compose l'annee
+    snprintf(code,30, "%d%s%04d",chriffresAnnee,etablissement,index);
     return code;
 }
+
 //enregistrement d'un etudiant dans le fichier
-void enregistrerEtudiant(Etudiant student)
+void enregistrerEtudiant(const char *nomFichier,Etudiant student)
 {
-    FILE *f = fopen("student.txt", "a");
+    FILE *f = fopen(nomFichier, "a");
     if (f == NULL) {
         printf("Erreur lors de l'ouverture du fichier\n");
         exit(1);
     }
-    fprintf(f,"\n%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c",student.matricule,student.nom,student.prenom,student.dateNaissance.jour,student.dateNaissance.mois,student.dateNaissance.annee,student.departement,student.filiere,student.region,student.sexe);
+    fprintf(f,"%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",student.matricule,student.nom,student.prenom,student.dateNaissance.jour,student.dateNaissance.mois,student.dateNaissance.annee,student.departement,student.filiere,student.region,student.sexe);
     fclose(f);
 }
-//creation d'un nouvel etudiant
-void creerEtudiant(Etudiant student) {
-    entete("Enregistrement d'un etudiant");
+
+//fonction pour creer un etudiant en l'ajoutant au fichier par la fonction enregistrerEtudiant
+Etudiant creerEtudiant(const char *nomFichier) 
+{
+    //printf("\tENREGISTREMENT D'UN ETUDIANT\n\n");
     FILE *indexFile = fopen("index.txt", "r");
     int i = 0;
-
+    Etudiant student;
     if (indexFile != NULL) {
         fscanf(indexFile, "%d", &i);
         fclose(indexFile);
@@ -121,41 +157,66 @@ void creerEtudiant(Etudiant student) {
 
     printf("Prenom : ");
     scanf("%19s", student.prenom);
+    Date present = dateActuelle();
     do
     {
-        
-    printf("Date de naissance :\n");
-    student.dateNaissance = creerDate();
-    } while (!dateValide(student.dateNaissance));
-    
-
+        printf("Date de naissance :\n");
+        student.dateNaissance = creerDate();
+    } while (student.dateNaissance.annee > present.annee);
     printf("Departement : ");
-    scanf("%19s", student.departement);
+    scanf("%14s", student.departement);
 
     printf("Filiere : ");
-    scanf("%19s", student.filiere);
+    scanf("%29s", student.filiere);
 
     printf("Region : ");
-    scanf("%19s", student.region);
-    printf("Quel est le sexe ? (M/F)");
-    scanf(" %c",&student.sexe);
-
+    scanf("%9s", student.region);
+    do
+    {
+        printf("Quel est le sexe ? (M/F)");
+        scanf(" %c",&student.sexe);       
+    } while ((student.sexe != 'm' && student.sexe != 'M') && (student.sexe != 'f' && student.sexe!='F'));
     char *matricule = generate_matricule("ENSPM", i);
     strncpy(student.matricule, matricule, 19);
     student.matricule[19] = '\0';
     free(matricule);
 
-    enregistrerEtudiant(student);
-    alert("Un etudiant vient d'etre ajoute avec succes.");
+    enregistrerEtudiant(nomFichier,student);
+    printf("Un etudiant vient d'etre ajoute avec succes.\n");
     FILE *increment = fopen("index.txt", "w");
     fprintf(increment, "%d", i + 1);
     fclose(increment);
+    return student;
 }
-
-void afficherTousLesEtudiant() {
-    FILE *f = fopen("student.txt", "r");
+// fonction pour afficher les donnees d'un etudiant
+void afficherEtudiant(Etudiant e)
+{
+    FILE *f = fopen(FICHIER_ETUDIANT,"r");
+    if (f == NULL)
+    {
+        printf("Erreur d'ouverture du fichier");
+        exit(1);    
+    }
+    fscanf(f,
+        "%19s\t%19s\t%19s\t%d/%d/%d\t%14s\t%29s\t%9s\t%c",
+        e.matricule,
+        e.nom,
+        e.prenom,
+        &e.dateNaissance.jour,
+        &e.dateNaissance.mois,
+        &e.dateNaissance.annee,
+        e.departement,
+        e.filiere,
+        e.region,
+        &e.sexe);
+    printf("Matricule: %s\nNom: %s\nprenom: %s\nDate de Naissance: %02d/%02d/%04d\nDepartement: %s\nFiliere: %s\nRegion:%s\nSexe: %c\n",e.matricule,e.nom,e.prenom,e.dateNaissance.jour,e.dateNaissance.mois,e.dateNaissance.annee,e.departement,e.filiere,e.region,e.sexe);
+}
+//fonction pour afficher la liste des etudiants dans la console
+void afficherTousLesEtudiant(const char *nomFichier) 
+{
+    FILE *f = fopen(nomFichier, "r");
     if (f == NULL) {
-        alert("Aucun etudiant present dans la base de donnees.\n");
+        printf("Aucun etudiant present dans la base de donnees.\n");
         return;
     }
 
@@ -192,31 +253,5 @@ void afficherTousLesEtudiant() {
                e.sexe);
             printf("------------------------------------------------------------------------------------------------------------------\n");
         }
-
-   // printf("--------------------------------------------------------------------------------------------------------\n");
     fclose(f);
-}
-
-void afficherEtudint(Etudiant e)
-{
-    FILE *f = fopen("student.txt","r");
-    if (f == NULL)
-    {
-        printf("Erreur d'ouverture du fichier");
-        exit(1);    
-    }
-    
-    fscanf(f,
-        "%19s\t%19s\t%19s\t%d/%d/%d\t%19s\t%19s\t%19s\t%c",
-        e.matricule,
-        e.nom,
-        e.prenom,
-        &e.dateNaissance.jour,
-        &e.dateNaissance.mois,
-        &e.dateNaissance.annee,
-        e.departement,
-        e.filiere,
-        e.region,
-        &e.sexe);
-    printf("Matricule: %19s\nNom: %19s\nprenom: %19s\nDate de Naissance: %02d/%02d/%04d\nDepartement: %19s\nFiliere: %19s\nRegion:%19s\nSexe: %c",e.matricule,e.nom,e.prenom,e.dateNaissance.jour,e.dateNaissance.mois,e.dateNaissance.annee,e.departement,e.filiere,e.region,e.sexe);
 }
