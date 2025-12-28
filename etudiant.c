@@ -1,4 +1,6 @@
-#include <stdio.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include"etudiant.h"
 
 int rechercherEtudiantParMatricule(const char *matricule, const char *nomFichier){
     File *f = fopen(nomFichier, "rb");
@@ -10,10 +12,12 @@ int rechercherEtudiantParMatricule(const char *matricule, const char *nomFichier
     while(fread(&e, sizeof(Etudiant), 1, f)){
         if(strcmp(e.matricule, matricule) == 0){
             fclose(f);
-            return &e; //On retroune l'étudiant trouver
+            afficheretudiant(&e);
+            return 0; //On retroune l'étudiant trouver
         }
     }
     fclose(f);
+    printf("L'étudiant n'a pas été trouver")
     return -1; //Etudiant non trouvé
 }
 
@@ -40,7 +44,8 @@ int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFich
         int comparaison = strcmp(e.matricule, matricule);
         if(comparaison == 0){
             fclose(f);
-            return &e; //On retourne l'étudiant trouvé
+            afficheretudiant(&e);
+            return 0; //On retourne l'étudiant trouvé
         } else if(comparaison < 0){
             gauche = milieu + 1;
         } else {
@@ -49,5 +54,6 @@ int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFich
     }
     
     fclose(f);
+    printf("L'étudiant n'a pas été trouver")
     return -1; //Etudiant non trouvé
 }
