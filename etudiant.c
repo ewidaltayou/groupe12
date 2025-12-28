@@ -12,7 +12,7 @@ int rechercherEtudiantParMatricule(const char *matricule, const char *nomFichier
     while(fread(&e, sizeof(Etudiant), 1, f)){
         if(strcmp(e.matricule, matricule) == 0){
             fclose(f);
-            afficheretudiant(&e);
+            afficherEtudiant(e);
             return 0; //On retroune l'étudiant trouver
         }
     }
@@ -44,7 +44,7 @@ int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFich
         int comparaison = strcmp(e.matricule, matricule);
         if(comparaison == 0){
             fclose(f);
-            afficheretudiant(&e);
+            afficherEtudiant(e);
             return 0; //On retourne l'étudiant trouvé
         } else if(comparaison < 0){
             gauche = milieu + 1;
