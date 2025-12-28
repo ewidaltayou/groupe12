@@ -1,5 +1,6 @@
 #ifndef ETUDIANT_H
 #define ETUDIANT_H
+
 // structure de la date
 typedef struct{
     int jour;
@@ -18,6 +19,7 @@ typedef struct{
    char sexe;
 }Etudiant;
 // gestion de la date
+int dateValide(Date*d);
 int anneeCourante();
 Date creerDate();
 int verifierDate(Date d);
@@ -31,7 +33,7 @@ int calculAge(const char*matricule,const char*nomFichier);
 int nombreEtudiant(const char*nomFichier);
 int verifierMatricule(const char*matricule);
 void afficherTousLesEtudiant(const char*nomFichier);
-void genererMatricule(const char matricule[], int annee, int numero);
+void genererMatricule( char matricule[], int annee, int numero);
 int prochainNumero();
 //pour les differentes recherches
 int rechercherEtudiantParMatricule(const char*matricule,const char*nomFichier);
@@ -42,7 +44,4 @@ void trierParNom(const char*nomFichier);
 void trierParMatricule(const char*nomFichier);
 void trierParRegion(const char*nomFichier);
 void trierParFiliere(const char*nomFichier);
-#endif
-
-
-
+#endif 
