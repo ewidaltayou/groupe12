@@ -5,7 +5,7 @@
 #include <string.h>
 //fichier de stockage des etudiants
 //fonction pour creer une date conforme
-Date creerDate()
+Date *creerDate()
 {
     Date d;
     int valide;
@@ -20,7 +20,7 @@ Date creerDate()
         scanf("%d", &d.jour);
 
         printf("\tMois: ");
-        scanf("%d", &d.mois);
+        scanf("%d", &d.moi);
 
         printf("\tAnnee: ");
         scanf("%d", &d.annee);
@@ -33,7 +33,7 @@ Date creerDate()
         }
 
         /* Vérification du mois */
-        if (d.mois < 1 || d.mois > 12)
+        if (d.moi < 1 || d.moi > 12)
         {
             printf("Le mois doit etre compris entre 1 et 12\n");
             valide = 0;
@@ -49,7 +49,7 @@ Date creerDate()
             }
             else
             {
-                switch (d.mois)
+                switch (d.moi)
                 {
                     case 1: case 3: case 5: case 7:
                     case 8: case 10: case 12:
@@ -96,7 +96,7 @@ Date creerDate()
 
     } while (!valide);
 
-    return d;
+    return &d;
 }
 //fonction pour retourner la date actuelle
 Date dateActuelle()
@@ -106,7 +106,7 @@ Date dateActuelle()
 
     Date d;
     d.jour = t->tm_mday;
-    d.mois = t->tm_mon + 1;
+    d.moi = t->tm_mon + 1;
     d.annee = t->tm_year + 1900;
 
     return d;    
@@ -133,12 +133,12 @@ void enregistrerEtudiant(const char *nomFichier,Etudiant student)
         printf("Erreur lors de l'ouverture du fichier\n");
         exit(1);
     }
-    fprintf(f,"%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",student.matricule,student.nom,student.prenom,student.dateNaissance.jour,student.dateNaissance.mois,student.dateNaissance.annee,student.departement,student.filiere,student.region,student.sexe);
+    fprintf(f,"%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",student.matricule,student.nom,student.prenom,student.datenaissance.jour,student.datenaissance.moi,student.datenaissance.annee,student.departement,student.filiere,student.region,student.sexe);
     fclose(f);
 }
 
 //fonction pour creer un etudiant en l'ajoutant au fichier par la fonction enregistrerEtudiant
-Etudiant creerEtudiant(const char *nomFichier) 
+Etudiant *creerEtudiant(const char *nomFichier) 
 {
     //printf("\tENREGISTREMENT D'UN ETUDIANT\n\n");
     FILE *indexFile = fopen("index.txt", "r");
@@ -160,8 +160,8 @@ Etudiant creerEtudiant(const char *nomFichier)
     do
     {
         printf("Date de naissance :\n");
-        student.dateNaissance = creerDate();
-    } while (student.dateNaissance.annee > present.annee);
+        student.datenaissance = *creerDate();
+    } while (student.datenaissance.annee > present.annee);
     printf("Departement : ");
     scanf("%14s", student.departement);
 
@@ -185,30 +185,12 @@ Etudiant creerEtudiant(const char *nomFichier)
     FILE *increment = fopen("index.txt", "w");
     fprintf(increment, "%d", i + 1);
     fclose(increment);
-    return student;
+    return &student;
 }
 // fonction pour afficher les donnees d'un etudiant
 void afficherEtudiant(Etudiant e)
 {
-    // FILE *f = fopen(,"r");
-    // if (f == NULL)
-    // {
-    //     printf("Erreur d'ouverture du fichier");
-    //     exit(1);    
-    // }
-    // fscanf(f,
-    //     "%19s\t%19s\t%19s\t%d/%d/%d\t%14s\t%29s\t%9s\t%c",
-    //     e.matricule,
-    //     e.nom,
-    //     e.prenom,
-    //     &e.dateNaissance.jour,
-    //     &e.dateNaissance.mois,
-    //     &e.dateNaissance.annee,
-    //     e.departement,
-    //     e.filiere,
-    //     e.region,
-    //     &e.sexe);
-    printf("Matricule: %s\nNom: %s\nprenom: %s\nDate de Naissance: %02d/%02d/%04d\nDepartement: %s\nFiliere: %s\nRegion:%s\nSexe: %c\n",e.matricule,e.nom,e.prenom,e.dateNaissance.jour,e.dateNaissance.mois,e.dateNaissance.annee,e.departement,e.filiere,e.region,e.sexe);
+    printf("Matricule: %s\nNom: %s\nprenom: %s\nDate de Naissance: %02d/%02d/%04d\nDepartement: %s\nFiliere: %s\nRegion:%s\nSexe: %c\n",e.matricule,e.nom,e.prenom,e.datenaissance.jour,e.datenaissance.moi,e.datenaissance.annee,e.departement,e.filiere,e.region,e.sexe);
 }
 //fonction pour afficher la liste des etudiants dans la console
 void afficherTousLesEtudiant(const char *nomFichier) 
@@ -231,9 +213,9 @@ void afficherTousLesEtudiant(const char *nomFichier)
         e.matricule,
         e.nom,
         e.prenom,
-        &e.dateNaissance.jour,
-        &e.dateNaissance.mois,
-        &e.dateNaissance.annee,
+        &e.datenaissance.jour,
+        &e.datenaissance.moi,
+        &e.datenaissance.annee,
         e.departement,
         e.filiere,
         e.region,
@@ -243,9 +225,9 @@ void afficherTousLesEtudiant(const char *nomFichier)
                e.matricule,
                e.nom,
                e.prenom,
-               e.dateNaissance.jour,
-               e.dateNaissance.mois,
-               e.dateNaissance.annee,
+               e.datenaissance.jour,
+               e.datenaissance.moi,
+               e.datenaissance.annee,
                e.departement,
                e.filiere,
                e.region,
