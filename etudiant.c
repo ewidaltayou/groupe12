@@ -4,7 +4,12 @@
 
 int rechercherEtudiantParMatricule(const char *matricule, const char *nomFichier){
     File *f = fopen(nomFichier, "rb");
-    if(!f){
+    //On s'assure que le matricule est valide et que le fichier s'ouvre correctement
+    if(!verifierMatricule(matricule)){
+        printf("Matricule invalide\n");
+        return -3; //Matricule invalide
+    }
+    else if(!f){
         printf("Erreur lors de l'ouverture du fichier\n");
         return -2;
     }
@@ -13,17 +18,25 @@ int rechercherEtudiantParMatricule(const char *matricule, const char *nomFichier
         if(strcmp(e.matricule, matricule) == 0){
             fclose(f);
             afficherEtudiant(e);
-            return 0; //On retroune l'étudiant trouver
+            return 0; //On retourne l'étudiant trouver
         }
     }
     fclose(f);
-    printf("L'étudiant n'a pas été trouver")
+    printf("L'étudiant n'a pas été trouver");
     return -1; //Etudiant non trouvé
 }
 
+
 int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFichier){
     File *f = fopen(nomFichier, "rb");
-    if(!f){
+    trierparMatricule(nomFichier); //On trie le fichier par matricule avant de faire la recherche dichotomique
+
+    if(!verifierMatricule(matricule)){
+        printf("Matricule invalide\n");     //On s'assure que le matricule est valide et que le fichier s'ouvre correctement
+        return -3; //Matricule invalide
+    }
+    
+    else if(!f){
         printf("Erreur lors de l'ouverture du fichier\n");
         return -2;
     }
@@ -54,6 +67,6 @@ int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFich
     }
     
     fclose(f);
-    printf("L'étudiant n'a pas été trouver")
+    printf("L'étudiant n'a pas été trouver");
     return -1; //Etudiant non trouvé
 }
