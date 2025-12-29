@@ -1,3 +1,9 @@
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include "etudiant.h"
 //fonction pour verifier le matticule
 int verifierMatricule(const char* matricule) {
     int i;
@@ -22,6 +28,7 @@ int verifierMatricule(const char* matricule) {
 
     return 1;
 }
+
 int nombreEtudiant(const char*nomFichier){
     FILE* f = fopen(nomFichier, "r");
     int count = 0;
@@ -42,6 +49,7 @@ int nombreEtudiant(const char*nomFichier){
     fclose(f);
     return count;
 }
+
 //fonction pour calculer l'age
 int calculAge(const char*matricule,const char*nomFichier){
     FILE* f = fopen(nomFichier, "r");
@@ -70,6 +78,7 @@ int calculAge(const char*matricule,const char*nomFichier){
     }
     return age;
 }
+
 //modifier etudiant
 int modifierEtudiant(const char* matricule, const char* nomFichier) {
     int tailletab=nombreEtudiant(nomFichier);
@@ -140,11 +149,12 @@ int modifierEtudiant(const char* matricule, const char* nomFichier) {
     printf("Etudiant modifie avec succes.\n");
     return 1;
 }
+
 //supprimer etudiant
 int supprimerEtudiant(const char*matricule,const char*nomFichier){
     if (!verifierMatricule(matricule)) {
-    printf("Matricule invalide.\n");
-    return 0;
+        printf("Matricule invalide.\n");
+        return 0;
     }
     FILE*f=fopen(nomFichier, "r");
     FILE* temp = fopen("temp.txt", "w");
@@ -167,7 +177,8 @@ int supprimerEtudiant(const char*matricule,const char*nomFichier){
                 e.matricule, e.nom, e.prenom,
                 e.dateNaissance.jour, e.dateNaissance.mois, e.dateNaissance.annee,
                 e.departement, e.filiere, e.region, e.sexe);
-    }}
+        }
+    }
 
     fclose(f);
     fclose(temp);
