@@ -3,62 +3,101 @@
 #include"etudiant.h"
 
 int rechercherEtudiantParMatricule(const char *matricule, const char *nomFichier){
-    File *f = fopen(nomFichier, "rb");
+    FILE *f = fopen(nomFichier, "r");
+
+    if(!f){
+        printf("Erreur lors de l'ouverture du fichier\n");
+        return -1; //Erreur d'ouverture du fichier
+    }
+
+    if (nombreEtudiant(nomFichier) == 0){
+        printf("Aucun étudiant dans le fichier\n");
+        return -2; //Fichier vide
+    }
+
     //On s'assure que le matricule est valide et que le fichier s'ouvre correctement
     if(!verifierMatricule(matricule)){
         printf("Matricule invalide\n");
         return -3; //Matricule invalide
     }
-    else if(!f){
-        printf("Erreur lors de l'ouverture du fichier\n");
-        return -2;
-    }
+
     Etudiant e;
-    while(fread(&e, sizeof(Etudiant), 1, f)){
-        if(strcmp(e.matricule, matricule) == 0){
-            fclose(f);
-            afficherEtudiant(e);
-            return 0; //On retourne l'étudiant trouver
+    char ligne[256];
+    int etudiant_trouver = 0 ; 
+
+    while(fgets(ligne, sizeof(ligne), f)){
+        int champslus = sscanf(ligne, "%s\t%s\t%s\t%f\t%s\t%s\t%s\t%c", e.matricule, e.nom, e.prenom, &e.dateNaissance, e.departement, e.filiere, e.region, &e.sexe);
+        if(champslus == 8){
+            if(strcmp(e.matricule, matricule) == 0){
+                etudiant_trouver = 1;
+                break ; 
+        }
+     } else {
+        printf("Format de ligne invalide dans le fichier\n");
         }
     }
+
     fclose(f);
-    printf("L'étudiant n'a pas été trouver");
-    return -1; //Etudiant non trouvé
+    if(etudiant_trouver){
+        afficherEtudiant(e);
+        return 0; //On retourne l'étudiant trouvé
+        
+    } else {
+    printf("L'étudiant avec le matricule %s n'a pas été trouver\n", matricule);
+    return -4; //Etudiant non trouvé
+    }
 }
 
 
 int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFichier){
-    File *f = fopen(nomFichier, "rb");
-    trierparMatricule(nomFichier); //On trie le fichier par matricule avant de faire la recherche dichotomique
+    FILE *f = fopen(nomFichier, "r");
+    if(!f){
+    printf("Erreur lors de l'ouverture du fichier\n");
+    return -1; //Erreur d'ouverture du fichier
+    }
 
-    if(!verifierMatricule(matricule)){
+    else if(nombreEtudiant(nomFichier) == 0){
+        printf("Aucun étudiant dans le fichier\n");
+        return -2; //Fichier vide
+    }
+
+    else if(!verifierMatricule(matricule)){
         printf("Matricule invalide\n");     //On s'assure que le matricule est valide et que le fichier s'ouvre correctement
         return -3; //Matricule invalide
     }
-    
-    else if(!f){
-        printf("Erreur lors de l'ouverture du fichier\n");
-        return -2;
+    trierparMatricule(nomFichier); //On trie le fichier par matricule avant de faire la recherche dichotomique
+ 
+    Etudiant *etudiants = NULL;
+    int count = 0;
+    char ligne[256];
+
+    rewind(f);
+    while(fgets(ligne, sizeof(ligne), f)){
+        Etudiant e;
+        if(sscanf(ligne, "%s\t%s\t%s\t%f\t%s\t%s\t%s\t%c", e.matricule, e.nom, e.prenom, &e.dateNaissance, e.departement, e.filiere, e.region, &e.sexe) == 8){
+            etudiants = realloc(etudiants, (count + 1) * sizeof(Etudiant));
+            etudiants[count] = e;
+            count++;
+        }
     }
-    //Compter le nombre d'étudiant dans le fichier
-    fseek(f, 0, SEEK_END);
-    long taille = ftell(f);
-    int count = taille / sizeof(Etudiant);
-    fseek(f, 0, SEEK_SET);
+    fclose(f);
+
+    if(count == 0){
+        free(etudiants);
+        return -4 ;
+    }
     
     int gauche = 0, droite = count - 1;
-    Etudiant e;
-    
+
     while(gauche <= droite){
         int milieu = (gauche + droite) / 2;
-        fseek(f, milieu * sizeof(Etudiant), SEEK_SET);
-        fread(&e, sizeof(Etudiant), 1, f);
-        
-        int comparaison = strcmp(e.matricule, matricule);
+        int comparaison = strcmp(etudiants[milieu].matricule, matricule);
+
         if(comparaison == 0){
-            fclose(f);
-            afficherEtudiant(e);
+            afficherEtudiant(etudiants[milieu]);
+            free(etudiants);
             return 0; //On retourne l'étudiant trouvé
+
         } else if(comparaison < 0){
             gauche = milieu + 1;
         } else {
@@ -66,7 +105,7 @@ int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFich
         }
     }
     
-    fclose(f);
-    printf("L'étudiant n'a pas été trouver");
-    return -1; //Etudiant non trouvé
+    free(etudiants);
+    printf("L'étudiant n'a pas été trouver\n");
+    return -5; //Etudiant non trouvé
 }
