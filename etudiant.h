@@ -44,4 +44,12 @@ void trierParNom(const char*nomFichier);
 void trierParMatricule(const char*nomFichier);
 void trierParRegion(const char*nomFichier);
 void trierParFiliere(const char*nomFichier);
+//fonction de gestion de l'affichage
+void print_line(char c, int width);
+void print_centered(char*text, int width) ;
+void menu_header(char *header) ;
+void menu_item(char *key, char *value) ;
+void menu_footer() ;
+void alert(char *message);
+void entete(char *message);
 #endif 
