@@ -439,3 +439,77 @@ void afficherTousLesEtudiant(const char *nomFichier)
         
     fclose(f);
 }
+
+
+// //fonctions pour mieux presenter l'affichage du menu
+//constantes a utiliser
+#define MENU_WIDTH 80
+#define INDENT "\t\t"
+//tracer une ligne
+void print_line(char c, int width)
+{
+    printf(INDENT);
+    for(int i = 0; i < width; i++)
+        putchar(c);
+    putchar('\n');
+}
+//centrer le message
+void print_centered(char *text, int width)
+{
+    int len = strlen(text);
+    int left = (width - len) / 2;
+    int right = width - len - left;
+
+    for(int i = 0; i < left; i++) putchar(' ');
+    printf("%s", text);
+    for(int i = 0; i < right; i++) putchar(' ');
+}
+//l'entete d tableau
+void menu_header(char *header)
+{
+    printf("\n");
+    print_line('-', MENU_WIDTH);
+    printf(INDENT"|");
+    print_centered(header, MENU_WIDTH - 2);
+    printf("|\n");
+    print_line('-', MENU_WIDTH);
+}
+//ca c'est pour les differentes options du menu
+void menu_item(char *key, char *value)
+{
+    printf(INDENT"|  %s. %-72s |\n", key, value);
+}
+//ligne de fin du tableau du menu
+void menu_footer()
+{
+    print_line('-', MENU_WIDTH);
+    printf("\n");
+}
+//Formatage du message d'alerte
+void alert(char *message)
+{
+    int width = strlen(message) + 10;
+
+    printf("\n");
+    printf(INDENT INDENT);
+    for(int i = 0; i < width-2; i++) putchar('-');
+    printf("\n");
+
+   printf(INDENT INDENT"|   %s   |\n", message);
+
+    printf(INDENT INDENT);
+    for(int i = 0; i < width -2; i++) putchar('-');
+    printf("\n");
+}
+//message d'entete genre 'enregistrement d'un nouvel etudiant'
+void entete(char *message)
+{
+    printf("\n");
+    print_line('=', MENU_WIDTH);
+    printf(INDENT"|");
+    print_centered(message, MENU_WIDTH - 2);
+    printf("|\n");
+    print_line('=', MENU_WIDTH);
+    printf("\n");
+}
+
