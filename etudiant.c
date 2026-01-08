@@ -33,6 +33,7 @@ int verifierDate(Date d) {
         if ((bissextile && d.jour > 29) || (!bissextile && d.jour > 28))
             return 0;
     }
+    return 1;
 }
 
 Etudiant creerEtudiant(const char *nomFichier) {
