@@ -45,7 +45,15 @@ void trierParNom(const char*nomFichier);
 void trierParMatricule(const char*nomFichier);
 void trierParRegion(const char*nomFichier);
 void trierParFiliere(const char*nomFichier);
-//fonctions statistiques
-void nombreEtudiantsParRegion(const char*nomFichier);
-void nomreEtudiantsParFiliere(const char*nomFichier);
+
+//formatage de texte dans la console
+void menu_header(char *header);
+void menu_item(char *key, char *value);
+void menu_footer();
+void alert(char *message);
+void entete(char *message);
+void print_centered(char *text, int width);
+void cleanConsole();
+
+
 #endif 
