@@ -1,60 +1,249 @@
 #include <stdio.h>
-#include <time.h>
-#include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <string.h>
 #include "etudiant.h"
-//fonction pour verifier le matticule
-int verifierMatricule(const char* matricule) {
-    int i;
-    if (strlen(matricule) != 18)
+#include <time.h>
+#include <ctype.h>
+//creer date
+Date creerDate(){
+    Date d;
+    do{
+    printf("entrez le jour de naissance:");
+    scanf("%d",&d.jour);
+    printf("entrez le mois de naissance:");
+    scanf("%d",&d.mois);
+    printf("entrez l'annee de naissance:");
+    scanf("%d",&d.annee);
+}while(!verifierDate(d));
+    return d;
+}
+//verifier date
+int verifierDate(Date d) {
+    if(d.annee < 1900 || d.annee > anneeCourante() ||
+       d.mois < 1 || d.mois > 12 ||
+       d.jour < 1 || d.jour > 31) {
+        printf("Date invalide, reessayez\n");
         return 0;
-    const char prefix[] = "cm-uma-";
-    for (i = 0; i < 7; i++) {
-        if (tolower(matricule[i]) != prefix[i])
-            return 0;
     }
-    if (!isdigit(matricule[7]) || !isdigit(matricule[8]))
+    if ((d.mois == 4 || d.mois == 6 || d.mois == 9 || d.mois == 11) && d.jour > 30)
         return 0;
-    const char enspm[] = "enspm";
-    for (i = 9; i < 14; i++) {
-        if (tolower(matricule[i]) != enspm[i - 9])
-            return 0;
-    }
-    for (i = 14; i < 18; i++) {
-        if (!isdigit(matricule[i]))
-            return 0;
-    }
 
+    if (d.mois == 2) {
+        int bissextile = (d.annee % 4 == 0 && d.annee % 100 != 0) || (d.annee % 400 == 0);
+        if ((bissextile && d.jour > 29) || (!bissextile && d.jour > 28))
+            return 0;
+    }
     return 1;
 }
 
+Etudiant creerEtudiant(const char *nomFichier) {
+    Etudiant e;
+    FILE *f;
 
+    int annee = anneeCourante();
+    int numero = prochainNumero();
 
-//fonction pour calculer l'age
-int calculAge(const char*matricule,const char*nomFichier){
+    genererMatricule(e.matricule, annee, numero);
 
+    printf("\n=========== CREATION D'UN ETUDIANT ===========\n");
+   do{
+    printf("Nom  : ");
+    fgets(e.nom, sizeof(e.nom), stdin);
+    e.nom[strcspn(e.nom, "\n")] = 0;
+    printf("Prénom : ");
+    fgets(e.prenom, sizeof(e.prenom), stdin);
+    e.prenom[strcspn(e.prenom, "\n")] = 0;
+   do {
+        printf("Région : ");
+        fgets(e.region, sizeof(e.region), stdin);
+        e.region[strcspn(e.region, "\n")] = 0;
+    } while (!verifierRegion(e.region));
+    printf("Département : ");
+    fgets(e.departement, sizeof(e.departement), stdin);
+    e.departement[strcspn(e.departement, "\n")] = 0;
+    printf("Filière : ");
+    fgets(e.filiere, sizeof(e.filiere), stdin);
+    e.filiere[strcspn(e.filiere, "\n")] = 0;
+    do {
+        printf("Sexe (M/F) : ");
+        scanf(" %c", &e.sexe);
+        e.sexe = toupper(e.sexe);
+        getchar(); 
+    } while (e.sexe != 'M' && e.sexe != 'F');
+     do {
+        e.dateNaissance = creerDate();
+    } while (!verifierDate(e.dateNaissance));
+    viderBuffer();
+    }while(videChamps(e));
+    f = fopen(nomFichier, "a");
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(f,
+       "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",
+        e.matricule,
+        e.nom,
+        e.prenom,
+        e.dateNaissance.jour,
+        e.dateNaissance.mois,
+        e.dateNaissance.annee,
+        e.departement,
+        e.filiere,
+        e.region,
+        e.sexe
+    );
+
+    fclose(f);
+
+    printf(" Étudiant créé avec succès !\n");
+    printf("Matricule : %s\n", e.matricule);
+
+    return e;
+}
+//afficher etudiant
+void afficherEtudint(Etudiant e){
+    printf("Matricule: %s\n",e.matricule);
+    printf("Nom: %s\n",e.nom);
+    printf("Prenom: %s\n",e.prenom);
+    printf("Date de naissance: %02d/%02d/%04d\n",e.dateNaissance.jour,e.dateNaissance.mois,e.dateNaissance.annee);
+    printf("Departement: %s\n",e.departement);
+    printf("Filiere: %s\n",e.filiere);
+    printf("Region: %s\n",e.region);
+    printf("Sexe: %c\n",e.sexe);
+}
+int anneeCourante() {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    return tm.tm_year + 1900;
 }
 
-//modifier etudiant
-int modifierEtudiant(const char* matricule, const char* nomFichier) {
-    int tailletab=nombreEtudiant(nomFichier);
-    Etudiant etudiants[tailletab];
-    int n = 0; 
-    int trouve = 0;
+//determiner le prochain matricule
+ int prochainNumero() {
+    FILE* f = fopen("compteur.txt", "r");
+    int num = 0;
+
+    if (f != NULL) {
+        fscanf(f, "%d", &num);
+        fclose(f);
+    }
+
+
+//nombre etudiant
+int nombreEtudiant(const char* nomFichier) {    
+    FILE* f = fopen(nomFichier, "r");
+    int count = 0;
+    Etudiant e;
+
+    if (f == NULL) {
+        printf("aucun etudiant enregistrer.\n");
+        return count;
+    }
+
+    while (fscanf(f, "%[^\t]\t%[^\t]\t%[^\t]\t%d/%d/%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\n",
+                  e.matricule,
+                  e.nom,
+                  e.prenom,
+                  &e.dateNaissance.jour,
+                  &e.dateNaissance.mois,
+                  &e.dateNaissance.annee,
+                  e.departement,
+                  e.filiere,
+                  e.region,
+                  &e.sexe) != EOF) {
+        count++;
+    }
 
     FILE* f = fopen(nomFichier, "r");
-    if(f == NULL) {
-        printf("Erreur d'ouverture du fichier\n");
+    FILE* temp = fopen("temp.txt", "w");
+    Etudiant e;
+    int found = 0;
+
+    if (f == NULL || temp == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
         return 0;
     }
 
-    while(fscanf(f, "%s %s %s %d/%d/%d %s %s %s %c",
-                 etudiants[n].matricule, etudiants[n].nom, etudiants[n].prenom,
-                 &etudiants[n].dateNaissance.jour, &etudiants[n].dateNaissance.mois, &etudiants[n].dateNaissance.annee,
-                 etudiants[n].departement, etudiants[n].filiere, etudiants[n].region, &etudiants[n].sexe) != EOF) {
-        n++;
-        if(n >= tailletab) break;
+    while (fscanf(f, "%[^\t]\t%[^\t]\t%[^\t]\t%d/%d/%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\n",
+                  e.matricule,
+                  e.nom,
+                  e.prenom,
+                  &e.dateNaissance.jour,
+                  &e.dateNaissance.mois,
+                  &e.dateNaissance.annee,
+                  e.departement,
+                  e.filiere,
+                  e.region,
+                  &e.sexe) != EOF) {
+        if (strcmp(e.matricule, matricule) == 0) {
+            found = 1;
+            continue; 
+        }
+        fprintf(temp,
+               "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",
+                e.matricule,
+                e.nom,
+                e.prenom,
+                e.dateNaissance.jour,
+                e.dateNaissance.mois,
+                e.dateNaissance.annee,
+                e.departement,
+                e.filiere,
+                e.region,
+                e.sexe);
+    }
+
+    fclose(f);
+    fclose(temp);
+
+    remove(nomFichier);
+    rename("temp.txt", nomFichier);
+
+    if (found) {
+        printf("Étudiant avec le matricule %s supprimé avec succès.\n", matricule);
+    } else {
+        printf("Étudiant avec le matricule %s non trouvé.\n", matricule);
+    }
+
+    return found;
+}
+//modifier etudiant
+int modifierEtudiant(const char *matricule, const char *nomFichier) {
+    if(!verifierMatricule(matricule)) {
+        printf("Matricule invalide.\n");
+        return 0;
+    }
+    int n = nombreEtudiant(nomFichier);
+    if (n <= 0) {
+        printf("Aucun étudiant trouvé.\n");
+        return 0;
+    }
+
+    Etudiant *tab = malloc(n * sizeof(Etudiant));
+    if (!tab) return 0;
+
+    FILE *f = fopen(nomFichier, "r");
+    if (!f) {
+        free(tab);
+        printf("Erreur: ouverture du fichier impossible.\n");
+        return 0;
+    }
+
+    int i;
+    for (i = 0; i < n; i++) {
+        fscanf(f,
+            "%18[^\t]\t%29[^\t]\t%29[^\t]\t%d/%d/%d\t%29[^\t]\t%29[^\t]\t%29[^\t]\t %c\n",
+            tab[i].matricule,
+            tab[i].nom,
+            tab[i].prenom,
+            &tab[i].dateNaissance.jour,
+            &tab[i].dateNaissance.mois,
+            &tab[i].dateNaissance.annee,
+            tab[i].departement,
+            tab[i].filiere,
+            tab[i].region,
+            &tab[i].sexe
+        );
     }
     fclose(f);
     for(int i = 0; i < n; i++) {
@@ -116,14 +305,27 @@ int modifierEtudiant(const char* matricule, const char* nomFichier) {
         }
     }
 
-    if(!trouve) {
-        printf("Etudiant avec le matricule %s non trouve.\n", matricule);
+    if (!trouve) {
+        free(tab);
+        printf("Étudiant non trouvé.\n");
         return 0;
     }
+
     f = fopen(nomFichier, "w");
-    if(f == NULL) {
-        printf("Erreur d'ouverture du fichier pour ecriture\n");
-        return 0;
+    for (i = 0; i < n; i++) {
+        fprintf(f,
+            "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",
+            tab[i].matricule,
+            tab[i].nom,
+            tab[i].prenom,
+            tab[i].dateNaissance.jour,
+            tab[i].dateNaissance.mois,
+            tab[i].dateNaissance.annee,
+            tab[i].departement,
+            tab[i].filiere,
+            tab[i].region,
+            tab[i].sexe
+        );
     }
 
     for(int i = 0; i < n; i++) {
@@ -146,11 +348,11 @@ int supprimerEtudiant(const char*matricule,const char*nomFichier){
     FILE*f=fopen(nomFichier, "r");
     FILE* temp = fopen("temp.txt", "w");
     Etudiant e;
-    int trouve = 0;
+    int found = 0;
 
-    if (f == NULL || temp == NULL) {
-        printf("Erreur d'ouverture du fichier\n");
-        return 0;
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        return found;
     }
 
     while (fscanf(f, "%s\t%s\t%s\t%d/%d/%d\t%s\t%s\t%s\t%c",
@@ -168,10 +370,18 @@ int supprimerEtudiant(const char*matricule,const char*nomFichier){
 
     }
 
+    if (!found) {
+        printf("Étudiant avec le matricule %s non trouvé.\n", matricule);
+    }
+
     fclose(f);
-    fclose(temp);
-    remove(nomFichier);
-    rename("temp.txt", nomFichier);
+    return found;
+}
+//rechercher etudiant par nom
+int rechercherEtudiantParNom(const char* nom, const char* nomFichier) {   
+    FILE* f = fopen(nomFichier, "r");
+    Etudiant e;
+    int found = 0;
 
     if (trouve) {
         alert("SUPRESSION DE REUSSIE !");
@@ -180,143 +390,210 @@ int supprimerEtudiant(const char*matricule,const char*nomFichier){
         alert("ETUDIANT INTROUVABLE !");
         //printf("Etudiant avec le matricule %s non trouve.\n", matricule);
     }
-    return trouve;
-}
 
-//fichier de stockage des etudiants
-//fonction pour creer une date conforme
-Date creerDate()
-{
-    Date d;
-    int valide;
-
-    do
-    {
-        valide = 1;
-
-        printf("veuillez entrer convenablement la date dans le cas contraire vous serrez contraint de recommencer \n");
-
-       char buf[20];
-
-        printf("\tJour : ");
-        fgets(buf, sizeof(buf), stdin);
-        d.jour = atoi(buf);
-        printf("\tMois : ");
-        fgets(buf, sizeof(buf), stdin);
-        d.mois = atoi(buf);
-        printf("\tAnnee : ");
-        fgets(buf, sizeof(buf), stdin);
-        d.annee = atoi(buf);
-        if (d.annee <= 0)
-        {
-            printf("L'annee doit etre strictement positive\n");
-            valide = 0;
+    while (fscanf(f, "%[^\t]\t%[^\t]\t%[^\t]\t%d/%d/%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\n",
+                  e.matricule,
+                  e.nom,
+                  e.prenom,
+                  &e.dateNaissance.jour,
+                  &e.dateNaissance.mois,
+                  &e.dateNaissance.annee,
+                  e.departement,
+                  e.filiere,
+                  e.region,
+                  &e.sexe) != EOF) {
+        if (strcmp(e.nom, nom) == 0) {
+            afficherEtudint(e);
+            printf("-------------------------------------------\n");
+            found = 1;
         }
-
-        /* Vérification du mois */
-        if (d.mois < 1 || d.mois > 12)
-        {
-            printf("Le mois doit etre compris entre 1 et 12\n");
-            valide = 0;
-        }
-
-        /* Vérification du jour selon le mois */
-        if (valide)
-        {
-            if (d.jour < 1)
-            {
-                printf("Le jour doit etre superieur ou egal a 1\n");
-                valide = 0;
-            }
-            else
-            {
-                switch (d.mois)
-                {
-                    case 1: case 3: case 5: case 7:
-                    case 8: case 10: case 12:
-                        if (d.jour > 31)
-                        {
-                            printf("Ce mois comporte 31 jours maximum\n");
-                            valide = 0;
-                        }
-                        break;
-
-                    case 4: case 6: case 9: case 11:
-                        if (d.jour > 30)
-                        {
-                            printf("Ce mois comporte 30 jours maximum\n");
-                            valide = 0;
-                        }
-                        break;
-
-                    case 2://cas du mois de fevrier on a les annees bissectile et les annees ordinaires
-                        // Annnee bissectile
-                        if ((d.annee % 400 == 0) ||
-                            (d.annee % 4 == 0 && d.annee % 100 != 0))
-                        {
-                            if (d.jour > 29)
-                            {
-                                printf("Fevrier ne comporte pas plus de 29 jours cette annee\n");
-                                valide = 0;
-                            }
-                        }
-                        else
-                        {
-                            if (d.jour > 28)
-                            {
-                                printf("Fevrier ne comporte pas plus de 28 jours cette annee\n");
-                                valide = 0;
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-
-        printf("\n");
-
-    } while (!valide);
-
-    return d;
-}
-//fonction pour retourner la date actuelle
-Date dateActuelle()
-{
-    time_t now = time(NULL);
-    struct tm *t = localtime(&now);
-
-    Date d;
-    d.jour = t->tm_mday;
-    d.mois = t->tm_mon + 1;
-    d.annee = t->tm_year + 1900;
-
-    return d;    
-}
-//definition de la fonction pour gerer automatiquement le matricule
-char *generate_matricule(const char *etablissement, int index) {
-    char *code = malloc(30);
-    if (!code)
-    {
-      printf("Erreur d'allocation\n");
-      exit(1);
     }
-    Date dateActu = dateActuelle();
-    int chriffresAnnee = dateActu.annee % 100;//deux derniers chiffres qui compose l'annee
-    snprintf(code,30, "%d%s%04d",chriffresAnnee,etablissement,index);
-    return code;
-}
 
-//enregistrement d'un etudiant dans le fichier
-void enregistrerEtudiant(const char *nomFichier,Etudiant student)
-{
-    FILE *f = fopen(nomFichier, "a");
-    if (f == NULL) {
-        printf("Erreur lors de l'ouverture du fichier\n");
-        exit(1);
+    if (!found) {
+        printf("Aucun étudiant trouvé avec le nom %s.\n", nom);
     }
-    fprintf(f,"%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",student.matricule,student.nom,student.prenom,student.dateNaissance.jour,student.dateNaissance.mois,student.dateNaissance.annee,student.departement,student.filiere,student.region,student.sexe);
+
     fclose(f);
+    return found;
 }
+//trier par nom
+void trierParNom(const char* nomFichier) {  
+    int n = nombreEtudiant(nomFichier);
+    if (n == 0) {
+        printf("Aucun étudiant à trier.\n");
+        return;
+    }
+
+    Etudiant* etudiants = (Etudiant*)malloc(n * sizeof(Etudiant));
+    if (etudiants == NULL) {
+        printf("Erreur : mémoire insuffisante.\n");
+        return;
+    }
+    FILE* f = fopen(nomFichier, "r");
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        free(etudiants);
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        fscanf(f, "%[^\t]\t%[^\t]\t%[^\t]\t%d/%d/%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\n",
+               etudiants[i].matricule,
+               etudiants[i].nom,
+               etudiants[i].prenom,
+               &etudiants[i].dateNaissance.jour,
+               &etudiants[i].dateNaissance.mois,
+               &etudiants[i].dateNaissance.annee,
+               etudiants[i].departement,
+               etudiants[i].filiere,
+               etudiants[i].region,
+               &etudiants[i].sexe);
+    }
+    fclose(f);
+
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (strcmp(etudiants[j].nom, etudiants[j + 1].nom) > 0) {
+                Etudiant temp = etudiants[j];
+                etudiants[j] = etudiants[j + 1];
+                etudiants[j + 1] = temp;
+            }
+        }
+    }
+
+    f = fopen(nomFichier, "w");
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        free(etudiants);
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        fprintf(f,
+                "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",
+                etudiants[i].matricule,
+                etudiants[i].nom,
+                etudiants[i].prenom,
+                etudiants[i].dateNaissance.jour,
+                etudiants[i].dateNaissance.mois,    
+                etudiants[i].dateNaissance.annee,
+                etudiants[i].departement,
+                etudiants[i].filiere,
+                etudiants[i].region,
+                etudiants[i].sexe);
+    }
+    fclose(f);
+    free(etudiants);    
+    printf("Étudiants triés par nom avec succès.\n");
+}       
+//trier par matricule
+void trierParMatricule(const char* nomFichier) {    
+    int n = nombreEtudiant(nomFichier);
+    if (n == 0) {
+        printf("Aucun étudiant à trier.\n");
+        return;
+    }
+
+    Etudiant* etudiants = (Etudiant*)malloc(n * sizeof(Etudiant));
+    if (etudiants == NULL) {
+        printf("Erreur : mémoire insuffisante.\n");
+        return;
+    }
+    FILE* f = fopen(nomFichier, "r");
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        free(etudiants);
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        fscanf(f, "%[^\t]\t%[^\t]\t%[^\t]\t%d/%d/%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\n",
+               etudiants[i].matricule,
+               etudiants[i].nom,
+               etudiants[i].prenom,
+               &etudiants[i].dateNaissance.jour,
+               &etudiants[i].dateNaissance.mois,
+               &etudiants[i].dateNaissance.annee,
+               etudiants[i].departement,
+               etudiants[i].filiere,
+               etudiants[i].region,
+               &etudiants[i].sexe);
+    }
+    fclose(f);
+
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (strcmp(etudiants[j].matricule, etudiants[j + 1].matricule) > 0) {
+                Etudiant temp = etudiants[j];
+                etudiants[j] = etudiants[j + 1];
+                etudiants[j + 1] = temp;
+            }
+        }
+    }
+     for(int i=0;i<n;i++){
+        printf("Etudiant %d:\n", i + 1);
+        afficherEtudint(etudiants[i]);
+        printf("-----------------------\n");
+    }
+    f = fopen(nomFichier, "w");
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        free(etudiants);
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        fprintf(f,
+                "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",
+                etudiants[i].matricule,
+                etudiants[i].nom,
+                etudiants[i].prenom,
+                etudiants[i].dateNaissance.jour,
+                etudiants[i].dateNaissance.mois,    
+                etudiants[i].dateNaissance.annee,
+                etudiants[i].departement,
+                etudiants[i].filiere,
+                etudiants[i].region,
+                etudiants[i].sexe);
+    }
+    fclose(f);  
+    free(etudiants);
+    printf("Étudiants triés par matricule avec succès.\n");
+}
+//trier par region
+void trierParRegion(const char* nomFichier) {
+    int n = nombreEtudiant(nomFichier);
+    if (n == 0) {
+        printf("Aucun étudiant à trier.\n");
+        return;
+    }
+
+    Etudiant* etudiants = (Etudiant*)malloc(n * sizeof(Etudiant));
+    if (etudiants == NULL) {
+        printf("Erreur : mémoire insuffisante.\n");
+        return;
+    }
+    FILE* f = fopen(nomFichier, "r");
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        free(etudiants);
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        fscanf(f, "%[^\t]\t%[^\t]\t%[^\t]\t%d/%d/%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\n",
+               etudiants[i].matricule,
+               etudiants[i].nom,
+               etudiants[i].prenom,
+               &etudiants[i].dateNaissance.jour,
+               &etudiants[i].dateNaissance.mois,
+               &etudiants[i].dateNaissance.annee,
+               etudiants[i].departement,
+               etudiants[i].filiere,
+               etudiants[i].region,
+               &etudiants[i].sexe);
+    }
+    fclose(f);
 
 //fonction pour creer un etudiant en l'ajoutant au fichier par la fonction enregistrerEtudiant
 Etudiant creerEtudiant(const char *nomFichier) 
@@ -377,12 +654,23 @@ void afficherEtudiant(Etudiant e)
 {
     printf("Matricule: %s\nNom: %s\nprenom: %s\nDate de Naissance: %02d/%02d/%04d\nDepartement: %s\nFiliere: %s\nRegion:%s\nSexe: %c\n",e.matricule,e.nom,e.prenom,e.dateNaissance.jour,e.dateNaissance.mois,e.dateNaissance.annee,e.departement,e.filiere,e.region,e.sexe);
 }
-//fonction pour afficher la liste des etudiants dans la console
-void afficherTousLesEtudiant(const char *nomFichier) 
-{
-    FILE *f = fopen(nomFichier, "r");
+//trier par filiere
+void trierParFiliere(const char* nomFichier) {    
+    int n = nombreEtudiant(nomFichier);
+    if (n == 0) {
+        printf("Aucun étudiant à trier.\n");
+        return;
+    }
+
+    Etudiant* etudiants = (Etudiant*)malloc(n * sizeof(Etudiant));
+    if (etudiants == NULL) {
+        printf("Erreur : mémoire insuffisante.\n");
+        return;
+    }
+    FILE* f = fopen(nomFichier, "r");
     if (f == NULL) {
-        printf("Erreur d'ouverture ou aucun etudiant present dans la base de donnees.\n");
+        printf("Erreur : ouverture du fichier impossible.\n");
+        free(etudiants);
         return;
     }
     const int tailleBuffer = 100;
@@ -430,8 +718,34 @@ void afficherTousLesEtudiant(const char *nomFichier)
     }
 
     fclose(f);
-}
 
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (strcmp(etudiants[j].filiere, etudiants[j + 1].filiere) > 0) {
+                Etudiant temp = etudiants[j];
+                etudiants[j] = etudiants[j + 1];
+                etudiants[j + 1] = temp;
+            }
+        }
+    }
+    char filiereActuelle[30]="";
+    strcpy(filiereActuelle, etudiants[0].filiere);
+    printf("Filiere: %s\n", filiereActuelle);
+    for(int i=0;i<n;i++){
+        if(strcmp(filiereActuelle,etudiants[i].filiere)!=0){
+            strcpy(filiereActuelle,etudiants[i].filiere);
+            printf("Filiere: %s\n",filiereActuelle);
+        }
+        printf("Etudiant %d:\n", i + 1);
+        afficherEtudint(etudiants[i]);
+        printf("-----------------------\n");
+    }
+    f = fopen(nomFichier, "w");
+    if (f == NULL) {
+        printf("Erreur : ouverture du fichier impossible.\n");
+        free(etudiants);
+        return;
+    }
 
 // //fonctions pour mieux presenter l'affichage du menu
 //constantes a utiliser
@@ -477,21 +791,24 @@ void menu_footer()
     print_line('=', MENU_WIDTH);
     printf("\n");
 }
-//Formatage du message d'alerte
-void alert(char *message)
-{
-    int width = strlen(message) + 10;
-
-    printf("\n");
-    printf(INDENT INDENT);
-    for(int i = 0; i < width-2; i++) putchar('-');
-    printf("\n");
-
-   printf(INDENT INDENT"|   %s   |\n", message);
-
-    printf(INDENT INDENT);
-    for(int i = 0; i < width -2; i++) putchar('-');
-    printf("\n");
+//verifier region
+int verifierRegion(const char* region) {
+    const char* regionsValides[] = {
+        "adamaoua", "centre", "est", "extrême-nord",
+        "littoral", "nord", "nord-ouest", "ouest",
+        "sud", "sud-ouest"
+    };
+    int n = sizeof(regionsValides) / sizeof(regionsValides[0]);
+    for (int i = 0; i < n; i++) {
+        if (strcmp(region, regionsValides[i]) == 0) {
+            return 1; 
+        }
+    }
+    printf("Région invalide. Régions valides sont:\n");
+    for (int i = 0; i < n; i++) {
+        printf("- %s\n", regionsValides[i]);
+    }       
+    return 0; 
 }
 //message d'entete genre 'enregistrement d'un nouvel etudiant'
 void entete(char *message)
@@ -599,89 +916,6 @@ void trierParRegion(const char*nomFichier)
     printf("Étudiants triés par région avec succès.\n");
 }
 
-
-// void trierParFiliere(const char*nomFichier)
-// {
-//     int n = nombreEtudiant(nomFichier);
-//     if (n == 0) {
-//         printf("Aucun étudiant à trier.\n");
-//         return;
-//     }
-
-//     Etudiant* etudiants = (Etudiant*)malloc(n * sizeof(Etudiant));
-//     if (etudiants == NULL) {
-//         printf("Erreur : mémoire insuffisante.\n");
-//         return;
-//     }
-//     FILE* f = fopen(nomFichier, "r");
-//     if (f == NULL) {
-//         printf("Erreur : ouverture du fichier impossible.\n");
-//         free(etudiants);
-//         return;
-//     }
-
-//     for (int i = 0; i < n; i++) {
-//         fscanf(f, "%[^\t]\t%[^\t]\t%[^\t]\t%d/%d/%d\t%[^\t]\t%[^\t]\t%[^\t]\t%c\n",
-//                etudiants[i].matricule,
-//                etudiants[i].nom,
-//                etudiants[i].prenom,
-//                &etudiants[i].dateNaissance.jour,
-//                &etudiants[i].dateNaissance.mois,
-//                &etudiants[i].dateNaissance.annee,
-//                etudiants[i].departement,
-//                etudiants[i].filiere,
-//                etudiants[i].region,
-//                &etudiants[i].sexe);
-//     }
-//     fclose(f);
-
-//     for (int i = 0; i < n - 1; i++) {
-//         for (int j = 0; j < n - i - 1; j++) {
-//             if (strcasecmp(etudiants[j].filiere, etudiants[j + 1].filiere) > 0) {
-//                 Etudiant temp = etudiants[j];
-//                 etudiants[j] = etudiants[j + 1];
-//                 etudiants[j + 1] = temp;
-//             }
-//         }
-//     }
-//     char filiereActuelle[30]="";
-//     strcpy(filiereActuelle, etudiants[0].filiere);
-//     printf("Filiere: %s\n", filiereActuelle);
-//     for(int i=0;i<n;i++){
-//         if(strcasecmp(filiereActuelle,etudiants[i].filiere)!=0){
-//             strcpy(filiereActuelle,etudiants[i].filiere);
-//             printf("Filiere: %s\n",filiereActuelle);
-//         }
-//         printf("Etudiant %d:\n", i + 1);
-//         afficherEtudiant(etudiants[i]);
-//         printf("-----------------------\n");
-//     }
-//     f = fopen(nomFichier, "w");
-//     if (f == NULL) {
-//         printf("Erreur : ouverture du fichier impossible.\n");
-//         free(etudiants);
-//         return;
-//     }
-
-//     for (int i = 0; i < n; i++) {
-//         fprintf(f,
-//                 "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c\n",
-//                 etudiants[i].matricule, 
-//                 etudiants[i].nom,
-//                 etudiants[i].prenom,
-//                 etudiants[i].dateNaissance.jour,    
-//                 etudiants[i].dateNaissance.mois,    
-//                 etudiants[i].dateNaissance.annee,
-//                 etudiants[i].departement,
-//                 etudiants[i].filiere,
-//                 etudiants[i].region,
-//                 etudiants[i].sexe);
-//     }
-//     fclose(f);  
-//     free(etudiants);
-//     printf("Étudiants triés par filière avec succès.\n");
-
-// }
 int rechercherEtudiantParMatricule(const char*matricule,const char*nomFichier)
 {
 
@@ -697,12 +931,6 @@ int rechercherEtudiantParMatricule(const char*matricule,const char*nomFichier)
         printf("Aucun étudiant enregistrer\n");
         return -2; //Fichier vide
     }
-
-    //On s'assure que le matricule est valide et que le fichier s'ouvre correctement
-    // if(!verifierMatricule(matricule)){
-    //     printf("Matricule invalide\n");
-    //     return -3; //Matricule invalide
-    // }
 
     Etudiant e;
     char ligne[256];
