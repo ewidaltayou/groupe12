@@ -266,16 +266,19 @@ int verifierMatricule(const char* matricule) {
 int nombreEtudiant(const char* nomFichier){
     FILE* f = fopen(nomFichier, "r");
     int count = 0;
-   // Etudiant e;
+    Etudiant e;
+
     if (f == NULL) {
         printf("Erreur d'ouverture du fichier\n");
         return 0;
     }
-    char ligne[100];
-    while (fgets(ligne,sizeof(ligne),f))
-            {
-               count++;
-            }
+
+    while (fscanf(f, "%s\t%s\t%s\t%d/%d/%d\t%s\t%s\t%s\t%c",
+                  e.matricule, e.nom, e.prenom,
+                  &e.dateNaissance.jour, &e.dateNaissance.mois, &e.dateNaissance.annee,
+                  e.departement, e.filiere, e.region, &e.sexe) != EOF) {
+        count++;
+    }
 
     fclose(f);
     return count;
