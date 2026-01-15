@@ -3,9 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "etudiant.h"
-#ifdef _WIN32
-#include <windows.h>
-#endif
  int main(){
     char choice;
     //entete("BIENVENU DANS LE PROGRAMME DE GESTION DES ETUDIANTS");
@@ -121,7 +118,6 @@
                 char mat[20];
                 printf("entrez le matricule de l'etudiant a modifier: ");
                 scanf("%s",mat);
-                viderBuffer();
                 modifierEtudiant(mat,"etudiants.txt");
                 break;
             }
