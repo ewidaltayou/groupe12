@@ -9,6 +9,36 @@
 #define INDENT "\t\t"
 //fonction pour calculer l'age
 int calculAge(const char*matricule,const char*nomFichier){
+    FILE *f = fopen(nomFichier,"r");
+    int age = -1;
+    Etudiant e;
+    Date today = dateActuelle();
+    Date naissance;
+    if (f!=NULL)
+    {
+        printf("Erreur lors de l'ouverture du fichier! ");
+        return -1;
+    }
+    while (fscanf(f, "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c",e.matricule,e.nom,e.prenom,&e.dateNaissance.jour,&e.dateNaissance.mois,&e.dateNaissance.annee,e.departement,e.filiere,e.region,&e.sexe)==10)
+    {
+        if (strcasecmp(e.matricule, matricule))
+        {
+            age = today.annee - e.dateNaissance.annee;
+            if (today.mois < e.dateNaissance.mois || (today.mois == e.dateNaissance.mois && today.jour < e.dateNaissance.jour))
+            {
+                age--;
+            }
+            break;
+        }
+        
+    }
+    fclose(f);
+    if (age == -1)
+    {
+        printf("Etudiant avec le matricule %s non trouve", matricule);
+    }
+    return age;
+    
 
 }
 //fonction pour retourner le nombre d'etudiant
