@@ -831,11 +831,49 @@ int rechercherEtudiantPardichotomique(const char *matricule, const char *nomFich
     return -5; //Etudiant non trouvé
 }
 
+int rechercherEtudiantParNom(const char*nom, const char*nomFichier) {
+    
+    FILE *f = fopen(nomFichier, "r");
 
+    if(!f){
+        printf("Erreur lors de l'ouverture du fichier\n");
+        return -1; //Erreur d'ouverture du fichier
+    }
 
+    if (nombreEtudiant(nomFichier) == 0){
+        printf("Aucun étudiant enregistrer\n");
+        return -2; //Fichier vide
+    }
 
+    Etudiant e;
+    char ligne[256];
+    int etudiant_trouver = 0 ; 
 
-int rechercherEtudiantParNom(const char*matricule,const char*nomFichier)
-{
+    while(fgets(ligne, sizeof(ligne), f)){
+        int champslus = sscanf(ligne, "%s\t%s\t%s\t%02d/%02d/%04d\t%s\t%s\t%s\t%c", e.matricule, e.nom, e.prenom, &e.dateNaissance.jour,&e.dateNaissance.mois,&e.dateNaissance.annee, e.departement, e.filiere, e.region, &e.sexe);
+        if(champslus == 10){
+            if(strcasecmp(e.nom, nom) == 0){
+                etudiant_trouver = 1;
+                break ; 
+        }
+     } else {
+        printf("Format de ligne invalide dans le fichier\n");
+        }
+    }
 
+    fclose(f);
+    if(etudiant_trouver){
+        afficherEtudiant(e);
+        return 0; //On retourne l'étudiant trouvé
+        
+    } else {
+    printf("L'étudiant avec le nom %s n'a pas été trouver\n", nom);
+    return -4; //Etudiant non trouvé
+    }
 }
+
+
+  
+
+
+
