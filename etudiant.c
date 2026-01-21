@@ -44,7 +44,21 @@ int calculAge(const char*matricule,const char*nomFichier){
 //fonction pour retourner le nombre d'etudiant
 int nombreEtudiant(const char*nomFichier)
 {
-    
+     FILE* f = fopen(nomFichier, "r");
+    int count = 0;
+   // Etudiant e;
+    if (f == NULL) {
+        printf("Erreur d'ouverture du fichier\n");
+        return 0;
+    }
+    char ligne[100];
+    while (fgets(ligne,sizeof(ligne),f))
+            {
+               count++;
+            }
+
+    fclose(f);
+    return count;   
 }
 
 //modifier etudiant
