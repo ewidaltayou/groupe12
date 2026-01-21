@@ -18,7 +18,7 @@ typedef struct{
    char sexe;
 }Etudiant;
 // gestion de la date
-int anneeCourante();
+Date dateActuelle();
 Date creerDate();
 int verifierDate(Date d);
 void viderBuffer();
