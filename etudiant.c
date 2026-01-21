@@ -46,16 +46,16 @@ int nombreEtudiant(const char*nomFichier)
 {
      FILE* f = fopen(nomFichier, "r");
     int count = 0;
-    Etudiant e;
-    char ligne[100];
+   // Etudiant e;
     if (f == NULL) {
         printf("Erreur d'ouverture du fichier\n");
         return 0;
     }
-
-    while (fgets(ligne, sizeof(ligne),f)) {
-        count++;
-    }
+    char ligne[100];
+    while (fgets(ligne,sizeof(ligne),f))
+            {
+               count++;
+            }
 
     fclose(f);
     return count;   
