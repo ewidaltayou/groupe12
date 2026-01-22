@@ -48,7 +48,7 @@ int nombreEtudiant(const char*nomFichier)
     int count = 0;
    // Etudiant e;
     if (f == NULL) {
-        printf("Erreur d'ouverture du fichier\n");
+
         return 0;
     }
     char ligne[100];
