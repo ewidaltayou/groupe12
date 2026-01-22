@@ -54,5 +54,4 @@ void alert(char *message);
 void entete(char *message);
 void print_centered(char *text, int width);
 void cleanConsole();
-
-#endif 
+#endif
