@@ -20,22 +20,19 @@ typedef struct{
 // gestion de la date
 Date dateActuelle();
 Date creerDate();
-int verifierDate(Date d);
-void viderBuffer();
+
 // operations de CRUD des etudiants
 Etudiant creerEtudiant(const char*nomFichier);
+void enregistrerEtudiant(const char *nomFichier,Etudiant student);
 int modifierEtudiant(const char*matricule,const char*nomFichier);
 int supprimerEtudiant(const char*matricule,const char*nomFichier);
-void afficherEtudint(Etudiant e);
+void afficherEtudiant(Etudiant e);
 // operations supplementaires
-int videChamps(Etudiant e);
-int verifierRegion(const char*region);
+void lireChaineNonVide(char *champ, int taille, const char *message);
 int calculAge(const char*matricule,const char*nomFichier);
 int nombreEtudiant(const char*nomFichier);
-int verifierMatricule(const char*matricule);
 void afficherTousLesEtudiant(const char*nomFichier);
-void genererMatricule( char matricule[], int annee, int numero);
-int prochainNumero();
+char *generate_matricule(const char *etablissement, int index);
 //pour les differentes recherches
 int rechercherEtudiantParMatricule(const char*matricule,const char*nomFichier);
 int rechercherEtudiantPardichotomique(const char*matricule,const char*nomFichier);
@@ -54,4 +51,5 @@ void alert(char *message);
 void entete(char *message);
 void print_centered(char *text, int width);
 void cleanConsole();
+void alert(char *message);
 #endif
